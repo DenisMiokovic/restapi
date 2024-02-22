@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.annotation.Commit;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -21,10 +22,9 @@ public class ProductControllerTest {
 	@Autowired
 	private MockMvc mockMvc;
 
-	/**
-	 *
-	 * @throws Exception
-	 */
+	@Autowired
+	private ObjectMapper objectMapper;
+
 	@Test
 	public void testAddProduct() throws Exception {
 		ProductRequest productRequest = new ProductRequest("HWIAW0WW4778201", "Huawei test cell", 178.99, "For testing purposes only");
@@ -79,6 +79,22 @@ public class ProductControllerTest {
 	public void testGetProductByCodeWithSpecialCharacters() throws Exception {
 		mockMvc.perform(get("/products?code=%22%3E%3Cscript%3Ealert(1)%3C%2Fscript%3E"))
 				.andExpect(status().isOk());
+	}
+
+	@Test
+	@Commit
+	public void testAddAndFetchProduct() throws Exception {
+		ProductRequest productRequest = new ProductRequest("HWIAW0WW4778201", "Huawei test cell", 178.99, "For testing purposes only");
+
+		mockMvc.perform(post("/addProduct")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(productRequest)))
+				.andExpect(status().isCreated());
+
+		mockMvc.perform(get("/products?code={code}", "HWIAW0WW4778201"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].code").value("HWIAW0WW4778201"))
+				.andExpect(jsonPath("$[0].name").value("Huawei test cell"));
 	}
 
 	@Test

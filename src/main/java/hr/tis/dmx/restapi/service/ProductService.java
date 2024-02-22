@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -54,6 +52,9 @@ public class ProductService {
 		return productRepository.save(product);
 	}
 
+	/**
+	 * Method fetches the current middle exchange rate for USD based on EUR value
+	 */
 	private Double fetchExchangeRate() throws ProductCreationException {
 		try {
 			ExchangeRateResponseEntry[] response = restTemplate.getForObject(hnbUrl, ExchangeRateResponseEntry[].class);
@@ -72,8 +73,10 @@ public class ProductService {
 	}
 
 	public PopularProductResponse findTop3PopularProducts() {
+		// in order to fetch top three results, pageable object is passed to the repo to ensure getting three results only - they are ordered using the query
 		Pageable topThree = PageRequest.of(0, 3);
 		List<PopularProductDto> popularProducts = productRepository.findTop3PopularProducts(topThree);
+		// setting rating to one decimal, rounding half up
 		popularProducts.forEach(dto -> dto.setAverageRating(BigDecimal.valueOf(dto.getAverageRating())
 				.setScale(1, RoundingMode.HALF_UP)
 				.doubleValue()));
