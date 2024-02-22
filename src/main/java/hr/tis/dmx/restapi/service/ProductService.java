@@ -1,13 +1,17 @@
 package hr.tis.dmx.restapi.service;
 
+import hr.tis.dmx.restapi.dto.PopularProductDto;
 import hr.tis.dmx.restapi.entity.Product;
 import hr.tis.dmx.restapi.exception.ProductCreationException;
 import hr.tis.dmx.restapi.hnb.ExchangeRateResponseEntry;
 import hr.tis.dmx.restapi.repository.ProductRepository;
 import hr.tis.dmx.restapi.request.ProductRequest;
+import hr.tis.dmx.restapi.response.PopularProductResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -67,5 +71,13 @@ public class ProductService {
 		return productRepository.findAllByCodeAndName(code, name);
 	}
 
+	public PopularProductResponse findTop3PopularProducts() {
+		Pageable topThree = PageRequest.of(0, 3);
+		List<PopularProductDto> popularProducts = productRepository.findTop3PopularProducts(topThree);
+		popularProducts.forEach(dto -> dto.setAverageRating(BigDecimal.valueOf(dto.getAverageRating())
+				.setScale(1, RoundingMode.HALF_UP)
+				.doubleValue()));
 
+		return new PopularProductResponse(popularProducts);
+	}
 }

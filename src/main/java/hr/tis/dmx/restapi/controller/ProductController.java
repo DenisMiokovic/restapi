@@ -4,7 +4,9 @@ import hr.tis.dmx.restapi.dto.ProductDto;
 import hr.tis.dmx.restapi.entity.Product;
 import hr.tis.dmx.restapi.exception.ProductCreationException;
 import hr.tis.dmx.restapi.request.ProductRequest;
+import hr.tis.dmx.restapi.response.PopularProductResponse;
 import hr.tis.dmx.restapi.service.ProductService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -12,7 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ProductController {
@@ -36,14 +40,25 @@ public class ProductController {
 	}
 
 	@GetMapping("/products")
-	public List<ProductDto> getProducts(@RequestParam(value = "code", required = false) String code,
-	                                 @RequestParam(value = "name", required = false) String name
-	) {
+	public ResponseEntity<List<ProductDto>> getProducts(@RequestParam(value = "code", required = false) String code,
+	                                                    @RequestParam(value = "name", required = false) String name,
+	                                                    HttpServletRequest request) throws ProductCreationException {
+		Map<String, String[]> parameterMap = request.getParameterMap();
+		if (!List.of("code", "name").containsAll(parameterMap.keySet())) {
+			throw new ProductCreationException("The request is allowed to have only the 'code' and 'name' parameters which are optional");
+		}
+
 		List<Product> products = productService.findByCodeAndName(code, name);
 		List<ProductDto> productDtos = new ArrayList<>();
 		products.forEach(product -> productDtos.add(convertToDto(product)));
 
-		return productDtos;
+		return ResponseEntity.ok(productDtos);
+	}
+
+	@GetMapping("/products/mostPopular")
+	public PopularProductResponse getTop3PopularProducts() {
+
+		return productService.findTop3PopularProducts();
 	}
 
 	private ProductDto convertToDto(Product product) {
@@ -54,6 +69,7 @@ public class ProductController {
 		productDto.setPriceEur(product.getPriceEUR());
 		productDto.setPriceUsd(product.getPriceUSD());
 		productDto.setDescription(product.getDescription());
+		productDto.setReviews(product.getReviews());
 
 		return productDto;
 	}

@@ -1,5 +1,6 @@
 package hr.tis.dmx.restapi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +20,7 @@ public class Review {
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "PRODUCT_ID", nullable = false)
+	@JsonIgnore
 	private Product product;
 
 	@Column(name = "REVIEWER", nullable = false)

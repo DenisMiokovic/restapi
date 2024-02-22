@@ -1,8 +1,11 @@
 package hr.tis.dmx.restapi.dto;
 
+import hr.tis.dmx.restapi.entity.Review;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -15,4 +18,5 @@ public class ProductDto {
 	private double priceEur;
 	private double priceUsd;
 	private String description;
+	private List<Review> reviews;
 }
