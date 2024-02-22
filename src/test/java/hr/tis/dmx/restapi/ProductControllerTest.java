@@ -27,12 +27,12 @@ public class ProductControllerTest {
 
 	@Test
 	public void testAddProduct() throws Exception {
-		ProductRequest productRequest = new ProductRequest("HWIAW0WW4778201", "Huawei test cell", 178.99, "For testing purposes only");
+		ProductRequest productRequest = new ProductRequest("IOS10TH45BN2345", "iPhone test cell", 999.99, "For testing purposes only");
 		mockMvc.perform(post("/addProduct")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content(new ObjectMapper().writeValueAsString(productRequest)))
 				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.name").value("Huawei test cell"));
+				.andExpect(jsonPath("$.name").value("iPhone test cell"));
 	}
 
 	@Test
